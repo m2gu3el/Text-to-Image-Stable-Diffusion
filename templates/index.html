@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Image Generator</title>
+</head>
+<body>
+    <h1>Text to Image Generator</h1>
+    <form id="text-form">
+        <input type="text" id="text-input" placeholder="Enter text" required>
+        <button type="submit">Generate Image</button>
+    </form>
+    <div id="image-container">
+        <img id="generated-image" src="" alt="Generated Image" style="display: none;">
+    </div>
+
+    <script>
+        document.getElementById('text-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const text = document.getElementById('text-input').value;
+    
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response:', data);  // Debug: Log the response data
+                const imageUrl = data.image_url;
+                const imageElement = document.getElementById('generated-image');
+                imageElement.src = imageUrl;
+                imageElement.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>    
+</body>
+</html>
