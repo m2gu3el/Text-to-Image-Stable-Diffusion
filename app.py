@@ -1,12 +1,10 @@
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from PIL import Image
-from pathlib import Path
 from transformers import CLIPTokenizer
 import torch
 import ModelLoader
 import Pipeline
-
 
 app = Flask(__name__)
 DEVICE = "cpu"
@@ -25,9 +23,47 @@ model_file = "/Users/urvisinghal/Desktop/Text to image/data/v1-5-pruned-emaonly.
 models = ModelLoader.preload_models_from_standard_weights(model_file, DEVICE)
 
 @app.route('/')
-def home():
-    return render_template('index.html')
+def index():
+    return '''
+    <!doctype html>
+    <title>Text to Image</title>
+    <h1>Text to Image</h1>
+    <form id="text-form">
+        <input type="text" id="text-input" placeholder="Enter text prompt">
+        <input type="submit" value="Generate">
+    </form>
+    <img id="generated-image" style="display:none;">
+    <script>
+        document.getElementById('text-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const text = document.getElementById('text-input').value;
 
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response:', data);  // Debug: Log the response data
+                const imageUrl = data.image_url;
+                const imageElement = document.getElementById('generated-image');
+                imageElement.src = imageUrl;
+                imageElement.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+    '''
 
 @app.route('/generate', methods=['POST'])
 def generate_image():
@@ -74,7 +110,6 @@ def generate_image():
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run(debug=True)
