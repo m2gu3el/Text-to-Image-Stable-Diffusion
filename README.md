@@ -61,6 +61,11 @@ Windows:
 ```
 pip install -r requirements.txt
 ```
+### Run the App
+
+```
+python app.py
+```
 ## What is Stable Diffusion?
 Stable Diffusion refers to a type of generative model used for creating high-quality images based on text prompts. It's part of the family of diffusion models, which are a type of deep generative model designed to generate data samples by iteratively denoising a noisy signal.
 
